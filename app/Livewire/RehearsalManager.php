@@ -15,7 +15,8 @@ class RehearsalManager extends Component
     // Propiedades del formulario
     public $rehearsalId = null;
     public $eventId = '';
-    public $name = '';
+    public $location = '';
+    public $notes = '';
     public $date = '';
 
     // Filtros
@@ -36,7 +37,8 @@ class RehearsalManager extends Component
     {
         return [
             'eventId' => 'required|exists:events,id',
-            'name' => 'required|string|max:255',
+            'location' => 'nullable|string|max:255',
+            'notes' => 'nullable|string',
             'date' => 'required|date',
         ];
     }
@@ -46,8 +48,7 @@ class RehearsalManager extends Component
         return [
             'eventId.required' => 'Debes seleccionar un evento.',
             'eventId.exists' => 'El evento seleccionado no existe.',
-            'name.required' => 'El nombre del ensayo es obligatorio.',
-            'name.max' => 'El nombre no puede tener más de 255 caracteres.',
+            'location.max' => 'La ubicación no puede tener más de 255 caracteres.',
             'date.required' => 'La fecha del ensayo es obligatoria.',
             'date.date' => 'La fecha no es válida.',
         ];
@@ -87,7 +88,8 @@ class RehearsalManager extends Component
     {
         $this->rehearsalId = null;
         $this->eventId = '';
-        $this->name = '';
+        $this->location = '';
+        $this->notes = '';
         $this->date = '';
         $this->resetValidation();
     }
@@ -118,7 +120,8 @@ class RehearsalManager extends Component
 
         $rehearsal = Rehearsal::findOrFail($id);
         $this->eventId = $rehearsal->event_id;
-        $this->name = $rehearsal->name;
+        $this->location = $rehearsal->location ?? '';
+        $this->notes = $rehearsal->notes ?? '';
         $this->date = $rehearsal->date->format('Y-m-d\TH:i');
 
         $this->showModal = true;
@@ -141,15 +144,18 @@ class RehearsalManager extends Component
             if ($this->modalMode === 'create') {
                 Rehearsal::create([
                     'event_id' => $this->eventId,
-                    'name' => $this->name,
+                    'location' => $this->location ?: null,
+                    'notes' => $this->notes ?: null,
                     'date' => $date,
+                    'created_by' => auth()->id(),
                 ]);
                 $this->flashMessage = 'Ensayo creado exitosamente.';
             } else {
                 $rehearsal = Rehearsal::findOrFail($this->rehearsalId);
                 $rehearsal->update([
                     'event_id' => $this->eventId,
-                    'name' => $this->name,
+                    'location' => $this->location ?: null,
+                    'notes' => $this->notes ?: null,
                     'date' => $date,
                 ]);
                 $this->flashMessage = 'Ensayo actualizado exitosamente.';

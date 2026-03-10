@@ -17,6 +17,8 @@ class MemberManager extends Component
     public $name = '';
     public $email = '';
     public $phone = '';
+    public $telegram_chat_id = '';
+    public $telegram_username = '';
     public $role = 'member';
     public $password = '';
     public $selectedInstruments = [];
@@ -40,6 +42,8 @@ class MemberManager extends Component
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email',
             'phone' => ['nullable', 'regex:/^\+502\d{8}$/'],
+            'telegram_chat_id' => 'nullable|string|max:50',
+            'telegram_username' => 'nullable|string|max:100|regex:/^@?[a-zA-Z0-9_]+$/',
             'role' => 'required|in:leader,member',
             'selectedInstruments' => 'nullable|array',
             'selectedInstruments.*' => 'exists:instruments,id',
@@ -65,6 +69,9 @@ class MemberManager extends Component
             'email.email' => 'El correo electrónico no es válido.',
             'email.unique' => 'Este correo electrónico ya está registrado.',
             'phone.regex' => 'El teléfono debe tener el formato +502XXXXXXXX (8 dígitos después del código de Guatemala).',
+            'telegram_chat_id.max' => 'El ID de Telegram no puede tener más de 50 caracteres.',
+            'telegram_username.max' => 'El nombre de usuario de Telegram no puede tener más de 100 caracteres.',
+            'telegram_username.regex' => 'El nombre de usuario de Telegram solo puede contener letras, números y guiones bajos.',
             'role.required' => 'El rol es obligatorio.',
             'role.in' => 'El rol seleccionado no es válido.',
             'password.required' => 'La contraseña es obligatoria.',
@@ -90,11 +97,11 @@ class MemberManager extends Component
             ->orderBy('name')
             ->paginate(10);
 
-        $instruments = Instrument::orderBy('name')->get();
+        $availableInstruments = Instrument::orderBy('name')->get();
 
         return view('livewire.member-manager', [
             'users' => $users,
-            'instruments' => $instruments,
+            'availableInstruments' => $availableInstruments,
         ])->layout('layouts.app');
     }
 
@@ -118,6 +125,8 @@ class MemberManager extends Component
         $this->name = $user->name;
         $this->email = $user->email;
         $this->phone = $user->phone;
+        $this->telegram_chat_id = $user->telegram_chat_id ?? '';
+        $this->telegram_username = $user->telegram_username ?? '';
         $this->role = $user->role;
         $this->password = '';
         
@@ -140,6 +149,8 @@ class MemberManager extends Component
             'name' => $this->name,
             'email' => $this->email,
             'phone' => $this->phone,
+            'telegram_chat_id' => $this->telegram_chat_id ?: null,
+            'telegram_username' => $this->telegram_username ?: null,
             'role' => $this->role,
             'password' => Hash::make($this->password),
         ];
@@ -164,6 +175,8 @@ class MemberManager extends Component
             'name' => $this->name,
             'email' => $this->email,
             'phone' => $this->phone,
+            'telegram_chat_id' => $this->telegram_chat_id ?: null,
+            'telegram_username' => $this->telegram_username ?: null,
             'role' => $this->role,
         ];
 
@@ -215,6 +228,8 @@ class MemberManager extends Component
         $this->name = '';
         $this->email = '';
         $this->phone = '';
+        $this->telegram_chat_id = '';
+        $this->telegram_username = '';
         $this->role = 'member';
         $this->password = '';
         $this->selectedInstruments = [];
@@ -226,6 +241,15 @@ class MemberManager extends Component
     {
         $this->showModal = false;
         $this->resetForm();
+    }
+
+    public function save()
+    {
+        if ($this->modalMode === 'create') {
+            $this->create();
+        } else {
+            $this->update();
+        }
     }
 
     public function toggleInstrument($instrumentId)

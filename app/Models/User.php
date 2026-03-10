@@ -23,6 +23,10 @@ class User extends Authenticatable
         'password',
         'phone',
         'role',
+        'is_active',
+        'notes',
+        'telegram_chat_id',
+        'telegram_username',
     ];
 
     /**
@@ -45,6 +49,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
 

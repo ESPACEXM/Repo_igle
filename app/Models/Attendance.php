@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Exceptions\InvalidAttendanceException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,8 +18,10 @@ class Attendance extends Model
      */
     protected $fillable = [
         'rehearsal_id',
+        'event_id',
         'user_id',
         'status',
+        'notes',
     ];
 
     /**
@@ -32,11 +35,43 @@ class Attendance extends Model
     ];
 
     /**
+     * Boot the model.
+     */
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::saving(function ($attendance) {
+            // Always validate attendance associations to ensure data integrity
+            $rehearsalId = $attendance->rehearsal_id;
+            $eventId = $attendance->event_id;
+
+            // Ensure attendance is associated with either a rehearsal or an event
+            if (is_null($rehearsalId) && is_null($eventId)) {
+                throw InvalidAttendanceException::missingAssociation();
+            }
+
+            // Ensure attendance is not associated with both a rehearsal and an event
+            if (!is_null($rehearsalId) && !is_null($eventId)) {
+                throw InvalidAttendanceException::duplicateAssociation();
+            }
+        });
+    }
+
+    /**
      * Get the rehearsal that owns this attendance.
      */
     public function rehearsal(): BelongsTo
     {
         return $this->belongsTo(Rehearsal::class);
+    }
+
+    /**
+     * Get the event that owns this attendance.
+     */
+    public function event(): BelongsTo
+    {
+        return $this->belongsTo(Event::class);
     }
 
     /**

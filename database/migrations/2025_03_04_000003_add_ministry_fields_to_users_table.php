@@ -14,6 +14,8 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->string('phone')->nullable()->after('email');
             $table->enum('role', ['leader', 'member'])->default('member')->after('phone');
+            $table->boolean('is_active')->default(true)->after('role');
+            $table->text('notes')->nullable()->after('is_active');
 
             $table->index('role');
             $table->index('phone');
@@ -28,7 +30,8 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->dropIndex(['role']);
             $table->dropIndex(['phone']);
-            $table->dropColumn(['phone', 'role']);
+            $table->dropColumn(['phone', 'role', 'is_active', 'notes']);
         });
     }
 };
+

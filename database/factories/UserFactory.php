@@ -28,6 +28,8 @@ class UserFactory extends Factory
             'password' => Hash::make('password'),
             'phone' => $this->faker->optional()->phoneNumber(),
             'role' => 'member',
+            'is_active' => true,
+            'notes' => $this->faker->optional()->sentence(),
             'remember_token' => Str::random(10),
         ];
     }

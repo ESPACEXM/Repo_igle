@@ -20,7 +20,9 @@ class Rehearsal extends Model
     protected $fillable = [
         'event_id',
         'date',
-        'name',
+        'location',
+        'notes',
+        'created_by',
     ];
 
     /**
@@ -60,4 +62,13 @@ class Rehearsal extends Model
             ->withPivot('status')
             ->withTimestamps();
     }
+
+    /**
+     * Get the user who created this rehearsal.
+     */
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 }
+

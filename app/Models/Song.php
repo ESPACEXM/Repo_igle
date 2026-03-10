@@ -18,10 +18,16 @@ class Song extends Model
      */
     protected $fillable = [
         'title',
-        'author',
+        'artist',
         'key',
-        'bpm',
-        'link',
+        'tempo',
+        'duration',
+        'lyrics_url',
+        'chords_url',
+        'youtube_url',
+        'lyrics',
+        'chords',
+        'spotify_url',
     ];
 
     /**
@@ -30,7 +36,8 @@ class Song extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'bpm' => 'integer',
+        'tempo' => 'integer',
+        'duration' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
@@ -45,5 +52,42 @@ class Song extends Model
             ->withPivot('order', 'notes')
             ->withTimestamps()
             ->orderBy('event_song.order');
+    }
+
+    /**
+     * Get the tags associated with this song.
+     */
+    public function tags(): BelongsToMany
+    {
+        return $this->belongsToMany(Tag::class)
+            ->withTimestamps();
+    }
+
+    /**
+     * Check if song has a specific tag.
+     */
+    public function hasTag(string $tagName): bool
+    {
+        return $this->tags()->where('name', $tagName)->exists();
+    }
+
+    /**
+     * Scope a query to filter by tag.
+     */
+    public function scopeWithTag($query, string $tagName)
+    {
+        return $query->whereHas('tags', function ($q) use ($tagName) {
+            $q->where('name', $tagName);
+        });
+    }
+
+    /**
+     * Scope a query to filter by tag type.
+     */
+    public function scopeWithTagType($query, string $type)
+    {
+        return $query->whereHas('tags', function ($q) use ($type) {
+            $q->where('type', $type);
+        });
     }
 }

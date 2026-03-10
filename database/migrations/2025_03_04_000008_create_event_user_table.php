@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('instrument_id')->nullable()->constrained()->onDelete('set null');
             $table->enum('status', ['confirmed', 'pending', 'declined'])->default('pending');
+            $table->text('notes')->nullable();
             $table->boolean('notification_sent')->default(false);
             $table->timestamps();
 

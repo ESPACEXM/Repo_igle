@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\TelegramWebhookController;
 use App\Livewire\AttendanceManager;
 use App\Livewire\EventManager;
 use App\Livewire\InstrumentManager;
@@ -8,6 +9,7 @@ use App\Livewire\MySchedule;
 use App\Livewire\RehearsalManager;
 use App\Livewire\ScheduleBuilder;
 use App\Livewire\SongManager;
+use App\Livewire\SongShow;
 use Illuminate\Support\Facades\Route;
 
 Route::view('/', 'welcome');
@@ -27,6 +29,7 @@ Route::middleware(['auth', 'role:leader'])->group(function () {
     Route::get('/events', EventManager::class)->name('events');
     Route::get('/events/{event}/roster', ScheduleBuilder::class)->name('events.roster');
     Route::get('/songs', SongManager::class)->name('songs');
+    Route::get('/songs/{song}', SongShow::class)->name('songs.show');
     Route::get('/rehearsals', RehearsalManager::class)->name('rehearsals');
     Route::get('/rehearsals/{rehearsal}/attendance', AttendanceManager::class)->name('rehearsals.attendance');
 });
@@ -35,5 +38,11 @@ Route::middleware(['auth', 'role:leader'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/my-schedule', MySchedule::class)->name('my-schedule');
 });
+
+// Webhook de Telegram (público, sin autenticación, sin CSRF)
+// Nota: La exclusión de CSRF ya está configurada en VerifyCsrfToken middleware
+Route::post('/telegram/webhook', [TelegramWebhookController::class, 'handle'])
+    ->middleware('web')
+    ->name('telegram.webhook');
 
 require __DIR__.'/auth.php';

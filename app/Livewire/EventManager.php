@@ -130,6 +130,7 @@ class EventManager extends Component
                     'name' => $this->name,
                     'date' => $this->date,
                     'description' => $this->description ?: null,
+                    'created_by' => auth()->id(),
                 ]);
                 $this->flashMessage = 'Evento creado exitosamente.';
             } else {

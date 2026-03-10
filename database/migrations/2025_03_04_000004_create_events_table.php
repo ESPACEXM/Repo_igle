@@ -15,7 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->dateTime('date');
+            $table->string('location')->nullable();
             $table->text('description')->nullable();
+            $table->foreignId('created_by')->constrained('users');
+            $table->index('created_by');
             $table->timestamps();
             $table->softDeletes();
 

@@ -39,4 +39,14 @@ return [
         'callmebot_api_key' => env('CALLMEBOT_API_KEY'),
     ],
 
+    'ultramsg' => [
+        'api_key' => env('ULTRAMSG_API_KEY'),
+        'instance_id' => env('ULTRAMSG_INSTANCE_ID'),
+    ],
+
+    'telegram' => [
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+        'secret_token' => env('TELEGRAM_SECRET_TOKEN'),
+    ],
+
 ];

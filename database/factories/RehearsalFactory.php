@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Event;
 use App\Models\Rehearsal;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -23,7 +24,29 @@ class RehearsalFactory extends Factory
         return [
             'event_id' => Event::factory(),
             'date' => $this->faker->dateTimeBetween('+1 day', '+2 weeks'),
-            'name' => $this->faker->sentence(2),
+            'location' => $this->faker->optional()->city(),
+            'notes' => $this->faker->optional()->sentence(),
+            'created_by' => User::factory(),
         ];
+    }
+
+    /**
+     * Assign a specific creator to the rehearsal.
+     */
+    public function createdBy(\App\Models\User $user): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'created_by' => $user->id,
+        ]);
+    }
+
+    /**
+     * Create a rehearsal without an associated event (independent rehearsal).
+     */
+    public function independent(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'event_id' => null,
+        ]);
     }
 }

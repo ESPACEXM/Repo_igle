@@ -5,7 +5,7 @@ namespace App\Livewire;
 use App\Models\Event;
 use App\Models\Instrument;
 use App\Models\User;
-use App\Services\WhatsAppService;
+use App\Services\TelegramService;
 use Livewire\Component;
 use Livewire\Attributes\Layout;
 
@@ -17,10 +17,13 @@ class ScheduleBuilder extends Component
     // Propiedades del formulario de asignación
     public $selectedUserId = '';
     public $selectedInstrumentId = '';
-    public $sendWhatsAppNotification = false;
+    public $sendTelegramNotification = false;
 
     // Lista de instrumentos disponibles para el miembro seleccionado
     public $availableInstruments = [];
+
+    // Usuario seleccionado actualmente (para mostrar info en la vista)
+    public $selectedUser = null;
 
     // Estados de UI
     public $flashMessage = null;
@@ -55,6 +58,9 @@ class ScheduleBuilder extends Component
 
     public function render()
     {
+        // Recargar usuarios asignados para obtener datos actualizados
+        $this->loadAssignedUsers();
+        
         // Obtener miembros que NO están asignados aún a este evento
         $assignedUserIds = $this->event->users()->pluck('users.id')->toArray();
         
@@ -66,6 +72,7 @@ class ScheduleBuilder extends Component
 
         return view('livewire.schedule-builder', [
             'availableMembers' => $availableMembers,
+            'assignedUsers' => $this->assignedUsers,
         ])->layout('layouts.app');
     }
 
@@ -86,6 +93,7 @@ class ScheduleBuilder extends Component
                     'instrument_name' => Instrument::find($user->pivot->instrument_id)?->name ?? 'Desconocido',
                     'status' => $user->pivot->status ?? 'pending',
                     'notification_sent' => $user->pivot->notification_sent ?? false,
+                    'decline_reason' => $user->pivot->decline_reason ?? null,
                 ];
             })
             ->toArray();
@@ -98,15 +106,30 @@ class ScheduleBuilder extends Component
     {
         $this->selectedInstrumentId = '';
         $this->availableInstruments = [];
+        $this->selectedUser = null;
 
         if ($value) {
             $user = User::with('instruments')->find($value);
-            if ($user) {
+            $this->selectedUser = $user;
+            
+            if ($user && $user->instruments->count() > 0) {
+                // Si el usuario tiene instrumentos asignados, usarlos
                 $this->availableInstruments = $user->instruments
                     ->map(function ($instrument) {
                         return [
                             'id' => $instrument->id,
                             'name' => $instrument->name . ($instrument->pivot->is_primary ? ' (Principal)' : ''),
+                        ];
+                    })
+                    ->toArray();
+            } else {
+                // Si el usuario no tiene instrumentos, mostrar todos los disponibles
+                $allInstruments = Instrument::orderBy('name')->get();
+                $this->availableInstruments = $allInstruments
+                    ->map(function ($instrument) {
+                        return [
+                            'id' => $instrument->id,
+                            'name' => $instrument->name,
                         ];
                     })
                     ->toArray();
@@ -138,21 +161,31 @@ class ScheduleBuilder extends Component
                 'notification_sent' => false,
             ]);
 
-            // Enviar notificación WhatsApp si está marcado
-            if ($this->sendWhatsAppNotification && $user->phone) {
-                $whatsappService = new WhatsAppService();
+            // Enviar notificación Telegram si está marcado
+            if ($this->sendTelegramNotification && $user->telegram_chat_id) {
+                $telegramService = app(TelegramService::class);
                 $instrument = Instrument::find($this->selectedInstrumentId);
                 
-                $result = $whatsappService->sendEventAssignmentNotification($user, $this->event, $instrument);
+                $result = $telegramService->sendEventConfirmationMessage(
+                    $user->telegram_chat_id,
+                    $user,
+                    $this->event,
+                    $instrument,
+                    true // requiere confirmación
+                );
                 
                 // Actualizar estado de notificación
-                $this->event->users()->updateExistingPivot($this->selectedUserId, [
-                    'notification_sent' => $result['success'],
-                ]);
+                if ($result['success']) {
+                    $this->event->users()->updateExistingPivot($this->selectedUserId, [
+                        'notification_sent' => true,
+                        'requires_confirmation' => true,
+                        'notification_type' => 'confirmation',
+                    ]);
+                }
 
                 // Log del resultado (no bloquear el flujo si falla)
                 if (!$result['success']) {
-                    \Log::warning("WhatsApp no enviado a {$user->name}: {$result['message']}");
+                    \Log::warning("Telegram no enviado a {$user->name}: {$result['message']}");
                 }
             }
 
@@ -188,29 +221,6 @@ class ScheduleBuilder extends Component
     }
 
     /**
-     * Enviar notificación WhatsApp a un miembro
-     */
-    protected function sendWhatsAppNotification(User $user): array
-    {
-        $whatsappService = new WhatsAppService();
-        $instrumentId = $this->event->users()
-            ->where('user_id', $user->id)
-            ->first()
-            ?->pivot
-            ?->instrument_id;
-        $instrument = $instrumentId ? Instrument::find($instrumentId) : null;
-        
-        if (!$instrument) {
-            return [
-                'success' => false,
-                'message' => 'No se encontró el instrumento asignado',
-            ];
-        }
-        
-        return $whatsappService->sendEventAssignmentNotification($user, $this->event, $instrument);
-    }
-
-    /**
      * Reenviar notificación a un miembro específico
      */
     public function resendNotification($userId)
@@ -218,13 +228,27 @@ class ScheduleBuilder extends Component
         try {
             $user = User::findOrFail($userId);
             
-            if (!$user->phone) {
-                $this->flashMessage = 'El miembro no tiene número de teléfono registrado.';
+            if (!$user->telegram_chat_id) {
+                $this->flashMessage = 'El miembro no tiene Telegram configurado en su perfil.';
                 $this->flashType = 'error';
                 return;
             }
 
-            $result = $this->sendWhatsAppNotification($user);
+            $telegramService = app(TelegramService::class);
+            $instrumentId = $this->event->users()
+                ->where('user_id', $user->id)
+                ->first()
+                ?->pivot
+                ?->instrument_id;
+            $instrument = $instrumentId ? Instrument::find($instrumentId) : null;
+
+            $result = $telegramService->sendEventConfirmationMessage(
+                $user->telegram_chat_id,
+                $user,
+                $this->event,
+                $instrument,
+                true
+            );
             
             // Actualizar estado de notificación
             $this->event->users()->updateExistingPivot($userId, [
@@ -232,7 +256,7 @@ class ScheduleBuilder extends Component
             ]);
 
             if ($result['success']) {
-                $this->flashMessage = 'Notificación reenviada exitosamente.';
+                $this->flashMessage = 'Notificación de Telegram reenviada exitosamente.';
                 $this->flashType = 'success';
             } else {
                 $this->flashMessage = 'Error al enviar: ' . $result['message'];
@@ -253,7 +277,7 @@ class ScheduleBuilder extends Component
     {
         $this->selectedUserId = '';
         $this->selectedInstrumentId = '';
-        $this->sendWhatsAppNotification = false;
+        $this->sendTelegramNotification = false;
         $this->availableInstruments = [];
         $this->resetValidation();
     }

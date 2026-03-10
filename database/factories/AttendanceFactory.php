@@ -23,8 +23,10 @@ class AttendanceFactory extends Factory
     {
         return [
             'rehearsal_id' => Rehearsal::factory(),
+            'event_id' => null,
             'user_id' => User::factory(),
-            'status' => $this->faker->randomElement(['present', 'absent', 'justified']),
+            'status' => $this->faker->randomElement(['present', 'absent', 'late', 'justified']),
+            'notes' => $this->faker->optional()->sentence(),
         ];
     }
 
@@ -55,6 +57,28 @@ class AttendanceFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'status' => 'justified',
+        ]);
+    }
+
+    /**
+     * Create attendance for an event instead of a rehearsal.
+     */
+    public function forEvent(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'rehearsal_id' => null,
+            'event_id' => \App\Models\Event::factory(),
+        ]);
+    }
+
+    /**
+     * Create attendance for a rehearsal (default behavior, explicit for clarity).
+     */
+    public function forRehearsal(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'event_id' => null,
+            'rehearsal_id' => Rehearsal::factory(),
         ]);
     }
 }

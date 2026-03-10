@@ -65,16 +65,16 @@ class DemoSeeder extends Seeder
         $this->command->info('🎸 Creando instrumentos...');
 
         $instruments = [
-            ['name' => 'Guitarra Acústica', 'type' => 'cuerdas', 'description' => 'Guitarra acústica estándar'],
-            ['name' => 'Guitarra Eléctrica', 'type' => 'cuerdas', 'description' => 'Guitarra eléctrica con amplificador'],
-            ['name' => 'Bajo Eléctrico', 'type' => 'cuerdas', 'description' => 'Bajo de 4 cuerdas'],
-            ['name' => 'Piano/Teclado', 'type' => 'teclas', 'description' => 'Teclado digital 88 teclas'],
-            ['name' => 'Batería Acústica', 'type' => 'percusion', 'description' => 'Batería completa con platillos'],
-            ['name' => 'Congas', 'type' => 'percusion', 'description' => 'Set de congas'],
-            ['name' => 'Saxofón Alto', 'type' => 'viento', 'description' => 'Saxofón en Mi bemol'],
-            ['name' => 'Trompeta', 'type' => 'viento', 'description' => 'Trompeta en Si bemol'],
-            ['name' => 'Voz Soprano', 'type' => 'voz', 'description' => 'Voz principal femenina'],
-            ['name' => 'Voz Tenor', 'type' => 'voz', 'description' => 'Voz principal masculina'],
+            ['name' => 'Guitarra Acústica', 'description' => 'Guitarra acústica estándar'],
+            ['name' => 'Guitarra Eléctrica', 'description' => 'Guitarra eléctrica con amplificador'],
+            ['name' => 'Bajo Eléctrico', 'description' => 'Bajo de 4 cuerdas'],
+            ['name' => 'Piano/Teclado', 'description' => 'Teclado digital 88 teclas'],
+            ['name' => 'Batería Acústica', 'description' => 'Batería completa con platillos'],
+            ['name' => 'Congas', 'description' => 'Set de congas'],
+            ['name' => 'Saxofón Alto', 'description' => 'Saxofón en Mi bemol'],
+            ['name' => 'Trompeta', 'description' => 'Trompeta en Si bemol'],
+            ['name' => 'Voz Soprano', 'description' => 'Voz principal femenina'],
+            ['name' => 'Voz Tenor', 'description' => 'Voz principal masculina'],
         ];
 
         foreach ($instruments as $instrument) {

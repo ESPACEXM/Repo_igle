@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('rehearsals', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('event_id')->constrained()->onDelete('cascade');
-            $table->dateTime('date');
+            $table->foreignId('event_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('name');
+            $table->dateTime('date');
             $table->timestamps();
             $table->softDeletes();
 
@@ -32,3 +32,4 @@ return new class extends Migration
         Schema::dropIfExists('rehearsals');
     }
 };
+

@@ -21,3 +21,13 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+# Database
+/database/database.sqlite
+
+# Vendor published assets
+/public/vendor/
+
+# Temporary development files
+temp_*
+*.png
+!example.png

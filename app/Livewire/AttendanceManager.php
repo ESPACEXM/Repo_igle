@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Exceptions\InvalidAttendanceException;
 use App\Models\Rehearsal;
 use App\Models\Attendance;
 use App\Models\Event;
@@ -47,6 +48,12 @@ class AttendanceManager extends Component
      */
     public function loadAttendances()
     {
+        // Verificar que el ensayo tenga un evento asociado
+        if (!$this->rehearsal->event) {
+            $this->attendances = [];
+            return;
+        }
+
         // Obtener miembros asignados al evento con estado 'confirmed'
         $assignedUsers = $this->rehearsal->event
             ->confirmedUsers()
@@ -127,9 +134,21 @@ class AttendanceManager extends Component
             $this->flashType = 'success';
             $this->saved = true;
             $this->loadAttendances(); // Recargar para obtener IDs
+        } catch (InvalidAttendanceException $e) {
+            // Handle validation errors from the Attendance model
+            $this->flashMessage = 'Error de validación: ' . $e->getMessage();
+            $this->flashType = 'error';
+            logger()->warning('InvalidAttendanceException: ' . $e->getMessage(), [
+                'rehearsal_id' => $this->rehearsal->id,
+                'user_id' => auth()->id(),
+            ]);
         } catch (\Exception $e) {
             $this->flashMessage = 'Error al guardar: ' . $e->getMessage();
             $this->flashType = 'error';
+            logger()->error('Error saving attendances: ' . $e->getMessage(), [
+                'rehearsal_id' => $this->rehearsal->id,
+                'exception' => $e,
+            ]);
         }
     }
 

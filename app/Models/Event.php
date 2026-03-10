@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -20,7 +21,9 @@ class Event extends Model
     protected $fillable = [
         'name',
         'date',
+        'location',
         'description',
+        'created_by',
     ];
 
     /**
@@ -41,7 +44,7 @@ class Event extends Model
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class)
-            ->withPivot('instrument_id', 'status', 'notification_sent')
+            ->withPivot('instrument_id', 'status', 'notification_sent', 'notes', 'decline_reason', 'declined_at', 'requires_confirmation', 'notification_type')
             ->withTimestamps();
     }
 
@@ -52,7 +55,7 @@ class Event extends Model
     {
         return $this->belongsToMany(User::class)
             ->wherePivot('status', 'confirmed')
-            ->withPivot('instrument_id', 'status', 'notification_sent')
+            ->withPivot('instrument_id', 'status', 'notification_sent', 'notes', 'decline_reason', 'declined_at', 'requires_confirmation', 'notification_type')
             ->withTimestamps();
     }
 
@@ -63,7 +66,7 @@ class Event extends Model
     {
         return $this->belongsToMany(User::class)
             ->wherePivot('status', 'pending')
-            ->withPivot('instrument_id', 'status', 'notification_sent')
+            ->withPivot('instrument_id', 'status', 'notification_sent', 'notes', 'decline_reason', 'declined_at', 'requires_confirmation', 'notification_type')
             ->withTimestamps();
     }
 
@@ -84,6 +87,22 @@ class Event extends Model
     public function rehearsals(): HasMany
     {
         return $this->hasMany(Rehearsal::class);
+    }
+
+    /**
+     * Get the attendances for this event.
+     */
+    public function attendances(): HasMany
+    {
+        return $this->hasMany(Attendance::class);
+    }
+
+    /**
+     * Get the user who created this event.
+     */
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     /**
