@@ -40,13 +40,28 @@ COPY . .
 # Instalar dependencias de PHP
 RUN composer install --no-dev --optimize-autoloader
 
+# Verificar que existen los archivos necesarios antes de construir
+RUN echo "Checking for required files..." && \
+    ls -la resources/css/app.css resources/js/app.js package.json vite.config.js || (echo "Some required files missing" && exit 1)
+
 # Instalar dependencias de Node.js y construir assets con logging detallado
 RUN echo "Installing Node.js dependencies..." && \
     npm install && \
+    echo "Node.js dependencies installed. Checking vite version..." && \
+    npx vite --version && \
     echo "Building Vite assets..." && \
-    npm run build && \
+    # Run the build and capture both stdout and stderr to see any errors
+    npx vite build --mode production || (echo "Vite build failed!" && exit 1) && \
     echo "Vite build completed. Checking manifest..." && \
-    ls -la public/build/ || echo "Manifest directory not found"
+    ls -la public/build/ || (echo "Manifest directory not found!" && exit 1) && \
+    if [ -f public/build/manifest.json ]; then \
+        echo "Manifest found! Contents:" && \
+        cat public/build/manifest.json; \
+    else \
+        echo "Manifest NOT found!"; \
+        ls -la public/build/; \
+        exit 1; \
+    fi
 
 # Limpiar caché de Composer
 RUN composer clear-cache
