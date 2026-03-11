@@ -1,6 +1,11 @@
 # Usar la imagen oficial de PHP 8.2 con Apache
 FROM php:8.2-apache
 
+# Establecer variables de entorno para la URL de la aplicación durante el build
+ARG APP_URL=https://contabilidad-sl9d.onrender.com
+ENV APP_URL=$APP_URL
+ENV NODE_ENV=production
+
 # Instalar dependencias del sistema incluyendo Node.js
 RUN apt-get update && apt-get install -y \
     git \
@@ -35,9 +40,13 @@ COPY . .
 # Instalar dependencias de PHP
 RUN composer install --no-dev --optimize-autoloader
 
-# Instalar dependencias de Node.js y construir assets
-RUN npm install
-RUN npm run build
+# Instalar dependencias de Node.js y construir assets con logging detallado
+RUN echo "Installing Node.js dependencies..." && \
+    npm install && \
+    echo "Building Vite assets..." && \
+    npm run build && \
+    echo "Vite build completed. Checking manifest..." && \
+    ls -la public/build/ || echo "Manifest directory not found"
 
 # Limpiar caché de Composer
 RUN composer clear-cache
