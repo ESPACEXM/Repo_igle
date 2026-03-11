@@ -76,9 +76,9 @@ class TelegramService
 
             Log::info("TelegramService: Enviando mensaje a {$chatId}");
 
-            // Configurar HTTP client - siempre verificar SSL en producción
+            // Configurar HTTP client - permitir desactivar SSL para desarrollo local
             $httpClient = Http::withOptions([
-                'verify' => true,
+                'verify' => env('TELEGRAM_VERIFY_SSL', true),
             ]);
 
             $response = $httpClient->post($url, [
@@ -179,9 +179,9 @@ class TelegramService
 
         try {
             $url = "{$this->endpoint}{$this->botToken}/getMe";
-            
+
             $httpClient = Http::withOptions([
-                'verify' => env('TELEGRAM_VERIFY_SSL', false),
+                'verify' => env('TELEGRAM_VERIFY_SSL', true),
             ]);
             
             $response = $httpClient->get($url);
@@ -432,7 +432,7 @@ class TelegramService
             Log::info("TelegramService: Enviando mensaje con teclado a {$chatId}");
 
             $httpClient = Http::withOptions([
-                'verify' => env('TELEGRAM_VERIFY_SSL', false),
+                'verify' => env('TELEGRAM_VERIFY_SSL', true),
             ]);
 
             $response = $httpClient->post($url, [
