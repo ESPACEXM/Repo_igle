@@ -1,7 +1,7 @@
 # Usar la imagen oficial de PHP 8.2 con Apache
 FROM php:8.2-apache
 
-# Instalar dependencias del sistema
+# Instalar dependencias del sistema incluyendo Node.js
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -10,6 +10,8 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     zip \
     unzip \
+    nodejs \
+    npm \
     && rm -rf /var/lib/apt/lists/*
 
 # Instalar extensiones de PHP
@@ -32,6 +34,10 @@ COPY . .
 
 # Instalar dependencias de PHP
 RUN composer install --no-dev --optimize-autoloader
+
+# Instalar dependencias de Node.js y construir assets
+RUN npm install
+RUN npm run build
 
 # Limpiar caché de Composer
 RUN composer clear-cache
