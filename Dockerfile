@@ -18,6 +18,9 @@ RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 # Configurar Apache
 RUN a2enmod rewrite
 
+# Cambiar el DocumentRoot de Apache a /var/www/html/public
+RUN sed -i -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
+
 # Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
@@ -36,6 +39,7 @@ RUN composer clear-cache
 # Configurar permisos
 RUN chown -R www-data:www-data /var/www/html
 RUN chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
+RUN chmod -R 755 /var/www/html/public
 
 # Exponer puerto 80
 EXPOSE 80
