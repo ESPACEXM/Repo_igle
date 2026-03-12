@@ -1,0 +1,86 @@
+version: 1
+services:
+  - type: web
+    name: contabilidad-sl9d
+    env: docker
+    plan: free
+    region: ohio
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_URL
+        value: https://contabilidad-sl9d.onrender.com
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        value: aws-0-us-west-2.pooler.supabase.com
+      - key: DB_PORT
+        value: "6543"
+      - key: DB_DATABASE
+        value: postgres
+      - key: DB_USERNAME
+        value: postgres
+      - key: DB_PASSWORD
+        sync: false
+      - key: BROADCAST_CONNECTION
+        value: log
+      - key: CACHE_STORE
+        value: file
+      - key: FILESYSTEM_DISK
+        value: local
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: SESSION_DRIVER
+        value: database
+
+  - type: worker
+    name: contabilidad-worker
+    env: docker
+    plan: free
+    region: ohio
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    command: php artisan queue:work
+    envVars:
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_URL
+        value: https://contabilidad-sl9d.onrender.com
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        value: aws-0-us-west-2.pooler.supabase.com
+      - key: DB_PORT
+        value: "6543"
+      - key: DB_DATABASE
+        value: postgres
+      - key: DB_USERNAME
+        value: postgres
+      - key: DB_PASSWORD
+        sync: false
+      - key: BROADCAST_CONNECTION
+        value: log
+      - key: CACHE_STORE
+        value: file
+      - key: FILESYSTEM_DISK
+        value: local
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: SESSION_DRIVER
+        value: database
+
+hooks:
+  - type: web
+    trigger: deploy
+    command: php artisan migrate --force
