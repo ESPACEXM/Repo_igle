@@ -13,8 +13,8 @@ RUN npm run build
 FROM php:8.2-apache
 WORKDIR /var/www/html
 # Install PHP extensions and Composer
-RUN apt-get update && apt-get install -y git libzip-dev zip unzip && \
-    docker-php-ext-install pdo_mysql zip && \
+RUN apt-get update && apt-get install -y git libzip-dev zip unzip libpq-dev && \
+    docker-php-ext-install pdo_mysql pdo_pgsql pgsql zip && \
     curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 # Copy the application (without node_modules) to avoid copying large files
 COPY . .
