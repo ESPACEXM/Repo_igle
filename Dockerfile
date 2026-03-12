@@ -1,6 +1,9 @@
 # Stage 1: Build assets with Node.js
 FROM node:18-alpine AS builder
 WORKDIR /app
+# Set the APP_URL for Vite base configuration
+ARG APP_URL=https://contabilidad-sl9d.onrender.com
+ENV APP_URL=$APP_URL
 COPY package*.json ./
 RUN npm install
 COPY . .
