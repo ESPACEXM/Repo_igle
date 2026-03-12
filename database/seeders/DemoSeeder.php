@@ -408,7 +408,17 @@ class DemoSeeder extends Seeder
 
         // Crear asistencias para ensayos
         foreach ($rehearsals as $rehearsal) {
-            foreach ($members->random(min(5, $members->count())) as $member) {
+            // Obtener una lista de miembros únicos para este ensayo
+            $selectedMembers = collect();
+            $count = min(5, $members->count());
+            while ($selectedMembers->count() < $count) {
+                $member = $members->random();
+                if (!$selectedMembers->contains($member) && !Attendance::where('user_id', $member->id)->where('rehearsal_id', $rehearsal->id)->exists()) {
+                    $selectedMembers->push($member);
+                }
+            }
+
+            foreach ($selectedMembers as $member) {
                 Attendance::create([
                     'user_id' => $member->id,
                     'rehearsal_id' => $rehearsal->id,
@@ -422,7 +432,17 @@ class DemoSeeder extends Seeder
         // Crear asistencias para eventos pasados
         $pastEvents = Event::where('date', '<', Carbon::now())->get();
         foreach ($pastEvents as $event) {
-            foreach ($members->random(min(5, $members->count())) as $member) {
+            // Obtener una lista de miembros únicos para este evento
+            $selectedMembers = collect();
+            $count = min(5, $members->count());
+            while ($selectedMembers->count() < $count) {
+                $member = $members->random();
+                if (!$selectedMembers->contains($member) && !Attendance::where('user_id', $member->id)->where('event_id', $event->id)->exists()) {
+                    $selectedMembers->push($member);
+                }
+            }
+
+            foreach ($selectedMembers as $member) {
                 Attendance::create([
                     'user_id' => $member->id,
                     'rehearsal_id' => null,
