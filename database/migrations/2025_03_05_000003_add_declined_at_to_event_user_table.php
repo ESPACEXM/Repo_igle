@@ -15,6 +15,9 @@ return new class extends Migration
             if (!Schema::hasColumn('event_user', 'declined_at')) {
                 $table->timestamp('declined_at')->nullable()->after('responded_at');
             }
+            if (!Schema::hasColumn('event_user', 'decline_reason')) {
+                $table->text('decline_reason')->nullable()->after('status');
+            }
         });
         
         // También agregar a attendances si no existe
@@ -36,6 +39,9 @@ return new class extends Migration
         Schema::table('event_user', function (Blueprint $table) {
             if (Schema::hasColumn('event_user', 'declined_at')) {
                 $table->dropColumn('declined_at');
+            }
+            if (Schema::hasColumn('event_user', 'decline_reason')) {
+                $table->dropColumn('decline_reason');
             }
         });
         
