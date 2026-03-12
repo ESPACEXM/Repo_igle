@@ -332,7 +332,7 @@
 
                     <div class="px-6 py-4 border-t border-church-100 flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
                         <x-church-button wire:click="cancelDelete" variant="secondary">Cancelar</x-church-button>
-                        <x-church-button wire:click="delete" variant="danger">Eliminar</x-church-button>
+                        <x-church-button wire:click="delete({{ $confirmingDelete }})" variant="danger">Eliminar</x-church-button>
                     </div>
                 </div>
             </div>
