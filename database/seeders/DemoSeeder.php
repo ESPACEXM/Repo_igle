@@ -78,7 +78,9 @@ class DemoSeeder extends Seeder
         ];
 
         foreach ($instruments as $instrument) {
-            Instrument::create($instrument);
+            if (!Instrument::where('name', $instrument['name'])->exists()) {
+                Instrument::create($instrument);
+            }
         }
     }
 
@@ -89,35 +91,41 @@ class DemoSeeder extends Seeder
     {
         $this->command->info('👑 Creando usuarios líderes...');
 
-        User::create([
-            'name' => 'Pastor Carlos Mendoza',
-            'email' => 'admin@iglesia.com',
-            'password' => Hash::make('password'),
-            'phone' => '50241234567',
-            'role' => 'leader',
-            'is_active' => true,
-            'notes' => 'Pastor principal de la iglesia',
-        ]);
+        $leaders = [
+            [
+                'name' => 'Pastor Carlos Mendoza',
+                'email' => 'admin@iglesia.com',
+                'password' => Hash::make('password'),
+                'phone' => '50241234567',
+                'role' => 'leader',
+                'is_active' => true,
+                'notes' => 'Pastor principal de la iglesia',
+            ],
+            [
+                'name' => 'María González',
+                'email' => 'maria@iglesia.com',
+                'password' => Hash::make('password'),
+                'phone' => '50242345678',
+                'role' => 'leader',
+                'is_active' => true,
+                'notes' => 'Directora de alabanza',
+            ],
+            [
+                'name' => 'Roberto Sánchez',
+                'email' => 'roberto@iglesia.com',
+                'password' => Hash::make('password'),
+                'phone' => '50243456789',
+                'role' => 'leader',
+                'is_active' => true,
+                'notes' => 'Coordinador de eventos',
+            ],
+        ];
 
-        User::create([
-            'name' => 'María González',
-            'email' => 'maria@iglesia.com',
-            'password' => Hash::make('password'),
-            'phone' => '50242345678',
-            'role' => 'leader',
-            'is_active' => true,
-            'notes' => 'Directora de alabanza',
-        ]);
-
-        User::create([
-            'name' => 'Roberto Sánchez',
-            'email' => 'roberto@iglesia.com',
-            'password' => Hash::make('password'),
-            'phone' => '50243456789',
-            'role' => 'leader',
-            'is_active' => true,
-            'notes' => 'Coordinador de eventos',
-        ]);
+        foreach ($leaders as $leaderData) {
+            if (!User::where('email', $leaderData['email'])->exists()) {
+                User::create($leaderData);
+            }
+        }
     }
 
     /**
@@ -179,19 +187,21 @@ class DemoSeeder extends Seeder
         ];
 
         foreach ($members as $memberData) {
-            $instruments = $memberData['instruments'] ?? [];
-            unset($memberData['instruments']);
+            if (!User::where('email', $memberData['email'])->exists()) {
+                $instruments = $memberData['instruments'] ?? [];
+                unset($memberData['instruments']);
 
-            $member = User::create([
-                ...$memberData,
-                'password' => Hash::make('password'),
-                'role' => 'member',
-                'is_active' => true,
-            ]);
+                $member = User::create([
+                    ...$memberData,
+                    'password' => Hash::make('password'),
+                    'role' => 'member',
+                    'is_active' => true,
+                ]);
 
-            // Asignar instrumentos
-            $instrumentIds = Instrument::whereIn('name', $instruments)->pluck('id');
-            $member->instruments()->attach($instrumentIds);
+                // Asignar instrumentos
+                $instrumentIds = Instrument::whereIn('name', $instruments)->pluck('id');
+                $member->instruments()->attach($instrumentIds);
+            }
         }
     }
 
@@ -266,7 +276,9 @@ class DemoSeeder extends Seeder
         ];
 
         foreach ($songs as $song) {
-            Song::create($song);
+            if (!Song::where('title', $song['title'])->where('artist', $song['artist'])->exists()) {
+                Song::create($song);
+            }
         }
     }
 
