@@ -106,32 +106,6 @@
 
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="space-y-6">
-                {{-- YouTube Video --}}
-                @if ($song->youtube_url)
-                    @php
-                        $videoId = '';
-                        if (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\s]+)/', $song->youtube_url, $matches)) {
-                            $videoId = $matches[1];
-                        }
-                    @endphp
-                    @if ($videoId)
-                        <div class="bg-white border border-church-200 rounded-xl overflow-hidden">
-                            <div class="aspect-video">
-                                <iframe
-                                    class="w-full h-full"
-                                    src="https://www.youtube.com/embed/{{ $videoId }}"
-                                    title="YouTube video player"
-                                    frameborder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowfullscreen
-                                    sandbox="allow-scripts allow-same-origin allow-presentation"
-                                    referrerpolicy="strict-origin-when-cross-origin"
-                                ></iframe>
-                            </div>
-                        </div>
-                    @endif
-                @endif
-
                 {{-- Chords --}}
                 @if ($song->chords)
                     <div class="bg-white border border-church-200 rounded-xl p-6">
@@ -178,6 +152,32 @@
                         </a>
                     @endif
                 </div>
+
+                {{-- YouTube Video --}}
+                @if ($song->youtube_url)
+                    @php
+                        $videoId = '';
+                        if (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\s]+)/', $song->youtube_url, $matches)) {
+                            $videoId = $matches[1];
+                        }
+                    @endphp
+                    @if ($videoId)
+                        <div class="bg-white border border-church-200 rounded-xl overflow-hidden shadow-lg">
+                            <div class="aspect-video">
+                                <iframe
+                                    class="w-full h-full"
+                                    src="https://www.youtube.com/embed/{{ $videoId }}"
+                                    title="YouTube video player"
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen
+                                    sandbox="allow-scripts allow-same-origin allow-presentation"
+                                    referrerpolicy="strict-origin-when-cross-origin"
+                                ></iframe>
+                            </div>
+                        </div>
+                    @endif
+                @endif
             </div>
         </div>
     </div>
