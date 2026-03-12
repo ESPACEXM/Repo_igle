@@ -39,6 +39,8 @@ services:
         value: database
       - key: SESSION_DRIVER
         value: database
+      - key: PORT
+        value: "10000"
 
   - type: worker
     name: contabilidad-worker
@@ -79,6 +81,8 @@ services:
         value: database
       - key: SESSION_DRIVER
         value: database
+      - key: PORT
+        value: "10000"
 
 hooks:
   - type: web

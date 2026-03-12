@@ -33,9 +33,9 @@ RUN chown -R www-data:www-data /var/www/html
 RUN chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Expose the port Render will use
-EXPOSE ${PORT:-8000}
+EXPOSE 10000
 
-# Run migrations and start the Laravel server
-CMD ["sh", "-c", "php artisan migrate --force --verbose && \
-    php artisan db:seed --force --verbose && \
-    php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"]
+# Run migrations and start the Laravel server - NO SEEDING to avoid timeout
+CMD ["sh", "-c", "php artisan migrate --force --no-interaction --quiet && \
+    echo 'Laravel server starting on port 10000...' && \
+    php artisan serve --host=0.0.0.0 --port=10000"]
