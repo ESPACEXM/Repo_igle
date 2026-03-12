@@ -30,6 +30,6 @@ RUN chmod -R 755 /var/www/html/storage /var/www/html/bootstrap/cache
 # Configure Apache
 RUN a2enmod rewrite
 RUN sed -i -e 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
-EXPOSE 80
+EXPOSE $PORT
 # Run migrations and start Apache
-CMD ["sh", "-c", "php artisan migrate --force --verbose && php artisan db:seed --force --verbose && apache2-foreground"]
+CMD ["sh", "-c", "sed -i -e \"s/Listen 80/Listen $PORT/\" /etc/apache2/ports.conf && php artisan migrate --force --verbose && php artisan db:seed --force --verbose && apache2-foreground"]
