@@ -268,9 +268,11 @@
                             ->where('status', 'absent')
                             ->count();
                         
-                        $totalAssigned = 0;
+                         $totalAssigned = 0;
                         foreach ($todayRehearsals as $rehearsal) {
-                            $totalAssigned += optional($rehearsal->event)->confirmedUsers()->count() ?? 0;
+                            if ($rehearsal->event) {
+                                $totalAssigned += $rehearsal->event->confirmedUsers()->count() ?? 0;
+                            }
                         }
                         $total = $totalAssigned;
                     } else {
