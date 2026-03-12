@@ -134,7 +134,7 @@ class MemberManager extends Component
         $this->selectedInstruments = $user->instruments->pluck('id')->toArray();
         
         // Obtener instrumento principal
-        $primaryInstrument = $user->instruments()->wherePivot('is_primary', true)->first();
+        $primaryInstrument = $user->instruments()->wherePivot('is_primary', 'true')->first();
         $this->primaryInstrumentId = $primaryInstrument ? $primaryInstrument->id : null;
         
         $this->modalMode = 'edit';

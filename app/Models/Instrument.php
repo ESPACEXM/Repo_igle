@@ -48,7 +48,7 @@ class Instrument extends Model
     public function primaryUsers(): BelongsToMany
     {
         return $this->belongsToMany(User::class)
-            ->wherePivot('is_primary', true)
+            ->wherePivot('is_primary', 'true')
             ->withTimestamps();
     }
 }

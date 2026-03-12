@@ -84,6 +84,6 @@ class User extends Authenticatable
      */
     public function primaryInstrument(): ?Instrument
     {
-        return $this->instruments()->wherePivot('is_primary', true)->first();
+        return $this->instruments()->wherePivot('is_primary', 'true')->first();
     }
 }
